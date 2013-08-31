@@ -1,0 +1,152 @@
+#! /usr/bin/env ruby
+
+# paSSSphrase: creates a very secure passphrase and the digital file
+# needed to store it safely on electro-etched physical media.
+#
+# Thanks to instructables.com/id/A-Stainless-Steel-Bitcoin-Wallet/ for the
+# original inspiration for this project.
+#
+# Requires ruby, ssss. Gems: rmagick, qrencoder.
+
+# Needed for Ruby 1.8. 1.9 does this automatically.
+require "rubygems"
+
+require "RMagick"
+require "qrencoder"
+require "securerandom"
+
+# A label that will appear below on each engraved share. Useful for
+# the people who have shares to refer to them.
+TOKEN = "passsphrase"
+
+# The number of shares that need to be combined to reconstruct the secret.
+THRESHOLD = 3
+
+# The total number of shares. This number is higher than THRESHOLD.
+# That's the whole point.
+SHARES = 5
+
+# The characters that can make up the passphrase.
+ALPHABET = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+# The number of characters in the generated passphrase.
+PASSPHRASE_LENGTH = 32  # 62^32 > 2^(5.9*32) > 2^188 ~= outrageously strong
+
+# The resolution that you'll be using to print. 300dpi is fine, because it'll
+# already be much higher than the resolution you can hope to achieve with
+# electroetching.
+DPI = 600
+FONT_SIZE = 80  # Play around with this if you adjust DPI.
+PIXELS_PER_MODULE = 16
+
+# The dimensions of your etching target, in inches. I chose to etch onto
+# 5x7 aluminum shingles, cut in half lengthwise.
+H_SIZE = 7 * DPI
+V_SIZE = 2.5 * DPI
+
+SIZE = V_SIZE
+MARGIN = (0.05 * DPI).to_i
+QR_MARGIN = (0.01 * DPI).to_i
+QR_SIZE = ((H_SIZE - (MARGIN * 2)) / SHARES).to_i
+
+template = Magick::Image::new(H_SIZE, V_SIZE)
+
+# Just drop bytes not in the alphabet. This is more conservative than trying
+# to fit those bytes into the alphabet. A common error in this situation is
+# something like random(MAX_INT) % THE_RANGE_I_WANT, which introduces bias
+# into the output.
+print "Generating passphrase... "
+passphrase = ''
+while passphrase.length < PASSPHRASE_LENGTH
+  c = SecureRandom.random_bytes(1)
+  passphrase += c if not ALPHABET.index(c).nil?
+end
+puts "done."
+
+# This line can take quite a while to run on some machines. I suspect it's
+# taking input from a blocking random number generator.
+print "Splitting passphrase... "
+shares = `echo -n "#{passphrase}" | \
+ssss-split -q -t #{THRESHOLD} -n #{SHARES}`.
+split(/\n/)
+if shares.nil? or shares.empty?
+  puts "You seem to be missing the utility ssss-split."
+  exit
+end
+puts "done."
+
+font_name = File.expand_path(File.join(File.dirname(__FILE__),
+                                       "DroidSansMono.ttf"))
+
+gc = Magick::Draw.new
+
+print "Generating etching pattern... "
+shares.each do |share|
+  vcursor = MARGIN * 4
+  index, secret = share.split("-")
+  index = index.to_i
+  position = (index - 1) * QR_SIZE
+
+  print "#{index}... "
+
+  # Why not high correction? 
+  share_qr = QREncoder.encode(share,
+                              :version => 1,
+                              :correction => :medium)
+  share_qr.png(:margin => QR_MARGIN,
+               :pixels_per_module => PIXELS_PER_MODULE
+               ).save("token-#{index}.png")
+  share_qr = Magick::Image::read("token-#{index}.png")
+    .first.resize(QR_SIZE, QR_SIZE)
+  template.composite!(share_qr, position, vcursor, Magick::OverCompositeOp)
+  vcursor += share_qr.rows
+
+  caption_image = Magick::Image.read("caption:#{TOKEN}-#{index}") {
+    self.font = font_name
+    self.fill = 'black'
+    self.stroke = 'transparent'
+    self.gravity = Magick::NorthGravity
+    self.size = "#{QR_SIZE}x#{FONT_SIZE}"
+  }.first
+  
+  combine_image = Magick::Image.read("caption:ssss-combine -t #{THRESHOLD}") {
+    self.font = font_name
+    self.fill = 'black'
+    self.stroke = 'transparent'
+    self.gravity = Magick::NorthGravity
+    self.size = "#{QR_SIZE}x#{FONT_SIZE}"
+  }.first
+  
+  template.composite!(caption_image, position, vcursor,
+                      Magick::OverCompositeOp)
+  vcursor += caption_image.rows
+  template.composite!(combine_image, position, vcursor,
+                      Magick::OverCompositeOp)
+
+  gc.line(position, 0, position, V_SIZE)
+end
+puts "done."
+
+gc.draw(template)
+
+template = template.flop().negate()
+
+template.write("etching-pattern-#{TOKEN}.png") {
+  self.density = "#{DPI}"
+  self.units = Magick::PixelsPerInchResolution
+}
+
+# When you're done executing this file, you'll end up with a number of files.
+#
+# etching-pattern.png is what you print and then transfer to your etching
+# medium using the method in the Instructable listed above (though I
+# found a laminator to be approximately 1,000,000% more reliable).
+#
+# token-[n].png is left over from the generation process. I don't know how to
+# securely delete on your platform, so I left that up to you.
+#
+# When you're done printing the etching-pattern file, SECURELY DELETE all these
+# PNG files! On Linux, that's [shred -u filename]. On OSX, it's [srm filename].
+# On Windows, I don't know what it is.
+
+puts "Remember to securely delete the generated PNGs when you're done!"
