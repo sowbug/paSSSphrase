@@ -3,7 +3,7 @@ paSSSphrase
 
 Split a strong passphrase among friends using Shamir's secret sharing, then etch it into metal so it'll last longer than you will.
 
-![An early sample](http://media.tumblr.com/6800db9909caa2d59e75b187e3489eed/tumblr_inline_msffak5w7X1qz4rgp.jpg)
+![An early sample](https://raw.github.com/sowbug/paSSSphrase/master/completed.jpg)
 
 Problem
 =======
