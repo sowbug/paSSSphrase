@@ -26,7 +26,7 @@ Details of Solution
 
 * SSS allows a subset of the tokens to reconstruct the secret. By default, this tool generates five tokens, where three are the threshold for recovery.
 * It's assumed that QR-code readers, ssss, and GPG will exist in the future. If not, your successors will need a magnifying glass, a calculator, and a lot of free time.
-* You get to choose the metal for etching. Aluminum is easy to etch and has predictable oxidization characteristics. Stainless steel is more durable but a lot harder to etch. I haven't tried copper or brass. It's my understanding you'll kill yourself if you try zinc (which is what "galvanization" means, so be careful).
+* You get to choose the metal for etching. Aluminum is easy to etch and has predictable oxidization characteristics, but its melting point is only very slightly higher than temperatures in a typical house fire. Stainless steel is more durable and has a much higher melting point, but it is a lot harder to etch. I haven't tried copper or brass. It's my understanding you'll kill yourself if you try zinc (which is what "galvanization" means, so be careful).
 
 What Happens When You Die?
 ==========================
