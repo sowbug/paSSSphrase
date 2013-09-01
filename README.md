@@ -75,3 +75,8 @@ Tips From My Experience with Etching
 * About every 90 seconds I brushed the surface of the tokens with an old toothbrush to remove the brown gunk.
 * Clean afterward with acetone.
 * Consider laminating the tokens to reduce oxidization risk, as well as to cover the sharp edges.
+
+Credits
+=======
+
+* Special thanks to [Brendan Erwin](https://github.com/brendanjerwin/cold_steel_storage), who wrote up the original Instructable and the first version of the Ruby script that became paSSSphrase.
