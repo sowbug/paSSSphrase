@@ -50,7 +50,7 @@ Generation and Etching Instructions
 1. Run passsphrase.
 1. Print exactly one copy of etching-pattern.png.
 1. Securely delete all the generated PNG files. You really won't need them again; if the process messes up, you'll regenerate a new passphrase.
-1. Follow the [Bitcoin Wallet Instructable](instructables.com/id/A-Stainless-Steel-Bitcoin-Wallet/) or [any other](http://steampunkworkshop.com/electroetch.shtml) electroetching tutorial.
+1. Follow the [Bitcoin Wallet Instructable](http://instructables.com/id/A-Stainless-Steel-Bitcoin-Wallet/) or [any other](http://steampunkworkshop.com/electroetch.shtml) electroetching tutorial.
 1. Cut the metal into individual tokens with tin snips.
 1. Distribute the tokens to the token-holders.
 1. Live a long life, secure in the knowledge that your secrets will be correctly transferred upon your death.
@@ -74,4 +74,4 @@ Tips From My Experience with Etching
 * I etched in a plastic peanut-butter jar at 9.3 volts for exactly five minutes. I saw about 1.6 amps current throughout.
 * About every 90 seconds I brushed the surface of the tokens with an old toothbrush to remove the brown gunk.
 * Clean afterward with acetone.
-* Consider laminating the tokens to reduce oxidization risk.
+* Consider laminating the tokens to reduce oxidization risk, as well as to cover the sharp edges.
