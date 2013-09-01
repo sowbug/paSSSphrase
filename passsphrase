@@ -12,6 +12,8 @@
 require "rubygems"
 
 require "RMagick"
+require "date"
+require "digest/sha1"
 require "qrencoder"
 require "securerandom"
 
@@ -63,6 +65,8 @@ while passphrase.length < PASSPHRASE_LENGTH
 end
 puts "done."
 
+passphrase_sha1 = Digest::SHA1.hexdigest(passphrase)[-5, 5]
+
 # This line can take quite a while to run on some machines. I suspect it's
 # taking input from a blocking random number generator.
 print "Splitting passphrase... "
@@ -109,6 +113,15 @@ shares.each do |share|
     self.size = "#{QR_SIZE}x#{FONT_SIZE}"
   }.first
   
+  sha1_image = Magick::Image.read(
+    "caption:#{Date.today.to_s} #{passphrase_sha1}") {
+    self.font = font_name
+    self.fill = 'black'
+    self.stroke = 'transparent'
+    self.gravity = Magick::NorthGravity
+    self.size = "#{QR_SIZE}x#{FONT_SIZE}"
+  }.first
+
   combine_image = Magick::Image.read("caption:ssss-combine -t #{THRESHOLD}") {
     self.font = font_name
     self.fill = 'black'
@@ -120,6 +133,9 @@ shares.each do |share|
   template.composite!(caption_image, position, vcursor,
                       Magick::OverCompositeOp)
   vcursor += caption_image.rows
+  template.composite!(sha1_image, position, vcursor,
+                      Magick::OverCompositeOp)
+  vcursor += sha1_image.rows
   template.composite!(combine_image, position, vcursor,
                       Magick::OverCompositeOp)
 
