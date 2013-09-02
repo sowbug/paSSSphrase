@@ -147,7 +147,7 @@ gc.draw(template)
 
 template = template.flop().negate()
 
-template.write("etching-pattern.png") {
+template.write("etching-pattern-#{passphrase_sha1}.png") {
   self.density = "#{DPI}"
   self.units = Magick::PixelsPerInchResolution
 }
