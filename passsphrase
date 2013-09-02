@@ -14,19 +14,37 @@ require "rubygems"
 require "RMagick"
 require "date"
 require "digest/sha1"
+require "optparse"
 require "qrencoder"
 require "securerandom"
 
-# A label that will appear below on each engraved share. Useful for
-# the people who have shares to refer to them.
-TOKEN = "passsphrase"
+options = { threshold: 3, shares: 5, label: "paSSSphrase", etch: true }
+OptionParser.new do |opts|
+  opts.banner = "Usage: passsphrase [options]"
 
-# The number of shares that need to be combined to reconstruct the secret.
-THRESHOLD = 3
+  opts.on("-t", "--threshold [THRESHOLD]",
+          "The number of shares required to reconstruct the secret. Default 3."
+          ) do |t|
+    options[:threshold] = t
+  end
 
-# The total number of shares. This number is higher than THRESHOLD.
-# That's the whole point.
-SHARES = 5
+  opts.on("-n", "--shares [SHARES]",
+          "The number of shares to generate. Default 5."
+          ) do |n|
+    options[:shares] = n
+  end
+
+  opts.on("-l", "--label [MNEMONIC]",
+          "Optional label for this set of shares.") do |label|
+    options[:label] = label
+  end
+
+  opts.on("-e", "--[no-]etch",
+          "Whether to generate a negative image for etching.") do |e|
+    options[:etch] = e
+  end
+
+end.parse!
 
 # The characters that can make up the passphrase.
 ALPHABET = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -49,7 +67,7 @@ V_SIZE = 2.5 * DPI
 SIZE = V_SIZE
 MARGIN = (0.05 * DPI).to_i
 QR_MARGIN = (0.01 * DPI).to_i
-QR_SIZE = ((H_SIZE - (MARGIN * 2)) / SHARES).to_i
+QR_SIZE = ((H_SIZE - (MARGIN * 2)) / options[:shares]).to_i
 
 template = Magick::Image::new(H_SIZE, V_SIZE)
 template.quantize(2, Magick::GRAYColorspace)
@@ -72,7 +90,7 @@ passphrase_sha1 = Digest::SHA1.hexdigest(passphrase)[-5, 5]
 # taking input from a blocking random number generator.
 print "Splitting passphrase... "
 shares = `echo -n "#{passphrase}" | \
-ssss-split -q -t #{THRESHOLD} -n #{SHARES}`.
+ssss-split -q -t #{options[:threshold]} -n #{options[:shares]}`.
 split(/\n/)
 if shares.nil? or shares.empty?
   puts "You seem to be missing the utility ssss-split."
@@ -84,9 +102,9 @@ font_name = File.expand_path(File.join(File.dirname(__FILE__),
                                        "DroidSansMono.ttf"))
 
 gc = Magick::Draw.new
-gc.stroke_width(4)
+gc.stroke_width(8)
 
-print "Generating etching pattern... "
+print "Generating image... "
 shares.each do |share|
   vcursor = MARGIN * 4
   index, secret = share.split("-")
@@ -95,19 +113,20 @@ shares.each do |share|
 
   print "#{index}... "
 
-  # Why not high correction? 
+  # Why not high correction? It's a compromise between large QR-code
+  # pixels and redundancy.
   share_qr = QREncoder.encode(share,
                               :version => 1,
                               :correction => :medium)
   share_qr.png(:margin => QR_MARGIN,
                :pixels_per_module => PIXELS_PER_MODULE
-               ).save("token-#{index}.png")
-  share_qr = Magick::Image::read("token-#{index}.png")
+               ).save("share-#{index}.png")
+  share_qr = Magick::Image::read("share-#{index}.png")
     .first.resize(QR_SIZE, QR_SIZE)
   template.composite!(share_qr, position, vcursor, Magick::OverCompositeOp)
   vcursor += share_qr.rows
 
-  caption_image = Magick::Image.read("caption:#{TOKEN}-#{index}") {
+  caption_image = Magick::Image.read("caption:#{options[:label]}-#{index}") {
     self.font = font_name
     self.fill = 'black'
     self.stroke = 'transparent'
@@ -124,14 +143,15 @@ shares.each do |share|
     self.size = "#{QR_SIZE}x#{FONT_SIZE}"
   }.first
 
-  combine_image = Magick::Image.read("caption:ssss-combine -t #{THRESHOLD}") {
+  combine_image =
+    Magick::Image.read("caption:ssss-combine -t #{options[:threshold]}") {
     self.font = font_name
     self.fill = 'black'
     self.stroke = 'transparent'
     self.gravity = Magick::NorthGravity
     self.size = "#{QR_SIZE}x#{FONT_SIZE}"
   }.first
-  
+
   template.composite!(caption_image, position, vcursor,
                       Magick::OverCompositeOp)
   vcursor += caption_image.rows
@@ -147,23 +167,25 @@ puts "done."
 
 gc.draw(template)
 
-template = template.flop().negate()
+if options[:etch]
+  template = template.flop().negate()
+end
 
-template.write("etching-pattern-#{passphrase_sha1}.png") {
+template.write("shares-#{passphrase_sha1}.png") {
   self.density = "#{DPI}"
   self.units = Magick::PixelsPerInchResolution
 }
 
 # When you're done executing this file, you'll end up with a number of files.
 #
-# etching-pattern.png is what you print and then transfer to your etching
+# shares.png is what you print and possibly transfer to your etching
 # medium using the method in the Instructable listed above (though I
 # found a laminator to be approximately 1,000,000% more reliable).
 #
-# token-[n].png is left over from the generation process. I don't know how to
+# share-[n].png is left over from the generation process. I don't know how to
 # securely delete on your platform, so I left that up to you.
 #
-# When you're done printing the etching-pattern file, SECURELY DELETE all these
+# When you're done printing the shares.png file, SECURELY DELETE all these
 # PNG files! On Linux, that's [shred -u filename]. On OSX, it's [srm filename].
 # On Windows, I don't know what it is.
 
