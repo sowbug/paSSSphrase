@@ -50,10 +50,12 @@ Generation and Etching Instructions
 1. Close the shades, kick everyone out of the house.
 1. cd to a temporary directory -- **not** to one that's automatically synced to the cloud (e.g., Dropbox).
 1. Run passsphrase.
-1. Print exactly one copy of etching-pattern.png.
+1. Print exactly one copy of shares.png.
 1. Securely delete all the generated PNG files. You really won't need them again; if the process messes up, you'll regenerate a new passphrase.
 1. Follow the [Bitcoin Wallet Instructable](http://instructables.com/id/A-Stainless-Steel-Bitcoin-Wallet/) or [any other](http://steampunkworkshop.com/electroetch.shtml) electroetching tutorial.
 1. Cut the metal into individual tokens with tin snips.
+1. Scan the threshold number of tokens and feed the result into `ssss-combine`. Do a `shasum` on the output (just the characters, no newlines). Confirm that the suffix of the output matches the hex digits on the tokens. Just for good measure, repeat this process until you've tested each token at least once.
+1. Use the passphrase to protect something. As described above, the passphrase is suitable for encrypting the private key of a GPG keypair.
 1. Distribute the tokens to the token-holders.
 1. Live a long life, secure in the knowledge that your secrets will be correctly transferred upon your death.
 

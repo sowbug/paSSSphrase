@@ -22,25 +22,27 @@ options = { threshold: 3, shares: 5, label: "paSSSphrase", etch: true }
 OptionParser.new do |opts|
   opts.banner = "Usage: passsphrase [options]"
 
-  opts.on("-t", "--threshold [THRESHOLD]",
-          "The number of shares required to reconstruct the secret. Default 3."
-          ) do |t|
-    options[:threshold] = t
-  end
-
-  opts.on("-n", "--shares [SHARES]",
-          "The number of shares to generate. Default 5."
+  opts.on("-n", "--shares [N]",
+          "Number of shares to generate. Default 5."
           ) do |n|
     options[:shares] = n
   end
 
-  opts.on("-l", "--label [MNEMONIC]",
-          "Optional label for this set of shares.") do |label|
+  opts.on("-t", "--threshold [N]",
+          "Number of shares required to reconstruct",
+          "the secret. Default 3."
+          ) do |t|
+    options[:threshold] = t
+  end
+
+  opts.on("-l", "--label [STRING]",
+          "Label for this set of shares.") do |label|
     options[:label] = label
   end
 
   opts.on("-e", "--[no-]etch",
-          "Whether to generate a negative image for etching.") do |e|
+          "Whether to generate a negative/mirrored",
+          "image for etching. Default true.") do |e|
     options[:etch] = e
   end
 
