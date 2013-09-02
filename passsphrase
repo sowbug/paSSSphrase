@@ -52,6 +52,7 @@ QR_MARGIN = (0.01 * DPI).to_i
 QR_SIZE = ((H_SIZE - (MARGIN * 2)) / SHARES).to_i
 
 template = Magick::Image::new(H_SIZE, V_SIZE)
+template.quantize(2, Magick::GRAYColorspace)
 
 # Just drop bytes not in the alphabet. This is more conservative than trying
 # to fit those bytes into the alphabet. A common error in this situation is
@@ -83,6 +84,7 @@ font_name = File.expand_path(File.join(File.dirname(__FILE__),
                                        "DroidSansMono.ttf"))
 
 gc = Magick::Draw.new
+gc.stroke_width(4)
 
 print "Generating etching pattern... "
 shares.each do |share|
