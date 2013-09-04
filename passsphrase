@@ -18,7 +18,8 @@ require "optparse"
 require "qrencoder"
 require "securerandom"
 
-options = { threshold: 3, shares: 5, label: "paSSSphrase", etch: true }
+options = { :threshold => 3, :shares => 5, :label => "paSSSphrase",
+  :etch => true }
 OptionParser.new do |opts|
   opts.banner = "Usage: passsphrase [options]"
 
@@ -123,8 +124,8 @@ shares.each do |share|
   share_qr.png(:margin => QR_MARGIN,
                :pixels_per_module => PIXELS_PER_MODULE
                ).save("share-#{index}.png")
-  share_qr = Magick::Image::read("share-#{index}.png")
-    .first.resize(QR_SIZE, QR_SIZE)
+  share_qr = Magick::Image::read("share-#{index}.png"
+                                 ).first.resize(QR_SIZE, QR_SIZE)
   template.composite!(share_qr, position, vcursor, Magick::OverCompositeOp)
   vcursor += share_qr.rows
 
