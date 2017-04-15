@@ -114,9 +114,8 @@ passphrase_sha1 = Digest::SHA1.hexdigest(passphrase)[-5, 5]
 # This line can take quite a while to run on some machines. I suspect it's
 # taking input from a blocking random number generator.
 print "Splitting secret... "
-shares = `echo -n "#{passphrase}" | \
-ssss-split -q -t #{options[:threshold]} -n #{options[:shares]}`.
-split(/\n/)
+shares = `printf "%s" #{passphrase} | \
+ssss-split -q -t #{options[:threshold]} -n #{options[:shares]}`.split(/\n/)
 if shares.nil? or shares.empty?
   puts "You seem to be missing the utility ssss-split."
   exit
