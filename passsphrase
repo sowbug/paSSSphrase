@@ -78,16 +78,18 @@ PASSPHRASE_LENGTH = options[:length]
 # already be much higher than the resolution you can hope to achieve with
 # electroetching.
 DPI = 600
-FONT_SIZE = 80  # Play around with this if you adjust DPI.
+FONT_SIZE = 84  # Play around with this if you adjust DPI.
 PIXELS_PER_MODULE = 16
 
-# The dimensions of your etching target, in inches. I chose to etch onto
-# 5x7 aluminum shingles, cut in half lengthwise.
-H_SIZE = 7 * DPI
-V_SIZE = 2.5 * DPI
+# The dimensions of your etching target, in inches. I chose to etch
+# onto 5x7 aluminum shingles, cut in half lengthwise. Then I got a
+# violet laser cutter and used dry moly lube to engrave on a series of
+# 20mm x 30mm stainless-steel rectangles.
+H_SIZE = 7.87402 * DPI
+V_SIZE = 2.3622 * DPI
 
 SIZE = V_SIZE
-MARGIN = (0.05 * DPI).to_i
+MARGIN = 0 #(0.05 * DPI).to_i
 QR_MARGIN = (0.01 * DPI).to_i
 QR_SIZE = ((H_SIZE - (MARGIN * 2)) / options[:shares]).to_i
 
@@ -122,7 +124,7 @@ end
 puts "done."
 
 font_name = File.expand_path(File.join(File.dirname(__FILE__),
-                                       "DroidSansMono.ttf"))
+                                       "Hack-Regular.ttf"))
 
 gc = Magick::Draw.new
 gc.stroke_width(8)
@@ -135,7 +137,7 @@ shares.each do |share|
   template = Magick::Image::new(QR_SIZE, V_SIZE)
   template.quantize(2, Magick::GRAYColorspace)
 
-  vcursor = MARGIN * 4
+  vcursor = MARGIN * 2
   index, secret = share.split("-")
   index = index.to_i
 
@@ -151,7 +153,7 @@ shares.each do |share|
                ).save("share-qr-#{index}.png")
   share_qr = Magick::Image::read("share-qr-#{index}.png"
                                  ).first.resize(QR_SIZE, QR_SIZE)
-  template.composite!(share_qr, 0, vcursor, Magick::OverCompositeOp)
+  template.composite!(share_qr, MARGIN, vcursor, Magick::OverCompositeOp)
   vcursor += share_qr.rows
 
   caption_image = Magick::Image.read("caption:#{options[:label]}-#{index}") {
@@ -180,13 +182,13 @@ shares.each do |share|
     self.size = "#{QR_SIZE}x#{FONT_SIZE}"
   }.first
 
-  template.composite!(caption_image, 0, vcursor,
+  template.composite!(caption_image, MARGIN, vcursor,
                       Magick::OverCompositeOp)
   vcursor += caption_image.rows
-  template.composite!(sha1_image, 0, vcursor,
+  template.composite!(sha1_image, MARGIN, vcursor,
                       Magick::OverCompositeOp)
   vcursor += sha1_image.rows
-  template.composite!(combine_image, 0, vcursor,
+  template.composite!(combine_image, MARGIN, vcursor,
                       Magick::OverCompositeOp)
   gc.draw(template)
 
@@ -195,7 +197,10 @@ shares.each do |share|
                                position,
                                0,
                                Magick::OverCompositeOp)
-  gc.line(position, 0, position, V_SIZE)
+
+  # This line is helpful if you're etching onto a single cuttable
+  # sheet of material.
+  #gc.line(position, 0, position, V_SIZE)
 
   template.write("share-#{passphrase_sha1}-#{index}.png") {
     self.density = "#{DPI}"
@@ -208,7 +213,6 @@ puts "done."
 if options[:etch]
   combined_template = combined_template.flop().negate()
 end
-gc.draw(combined_template)
 
 combined_template.write("shares-#{passphrase_sha1}.png") {
   self.density = "#{DPI}"
