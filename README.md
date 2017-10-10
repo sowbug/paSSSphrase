@@ -1,14 +1,22 @@
 paSSSphrase
 ===========
 
-Split a strong passphrase among friends using Shamir's secret sharing, then etch it into metal so it'll last longer than you will.
+Split a strong passphrase among friends using Shamir's secret sharing,
+then etch it into metal so it'll last longer than you will.
 
-![An early sample](https://raw.github.com/sowbug/paSSSphrase/master/completed.jpg)
+![An early
+ sample](https://raw.github.com/sowbug/paSSSphrase/master/completed.jpg)
 
 Problem
 =======
 
-You accept the truth that you're going to die someday, preferably far in the future. Like most of us, you have digital secrets that you want to pass to your successors. But while you're alive, your secrets should stay secret. And you really don't want your stuff to be discovered by the maid or your creepy roommate (meaning that printing them out unencrypted is a bad idea), or stolen by malware (meaning that keeping them online is a bad idea).
+You accept the truth that you're going to die someday, preferably far
+in the future. Like most of us, you have digital secrets that you want
+to pass to your successors. But while you're alive, your secrets
+should stay secret. And you really don't want your stuff to be
+discovered by the maid or your creepy roommate (meaning that printing
+them out unencrypted is a bad idea), or stolen by malware (meaning
+that keeping them online is a bad idea).
 
 Overview of Solution
 ====================
@@ -31,15 +39,28 @@ Details of Solution
 What Happens When You Die?
 ==========================
 
-You will have given the token-holders instructions to deliver the tokens to your successors upon your death. Hopefully one of them will be smart enough to figure out that the "ssss-combine" language on the tokens is a Unix shell command. If so, your successors will successfully reconstruct the passphrase. At that point, they will deduce that this string of gibberish must be the passphrase to that "Please Keep This Email Forever" email attachment you sent them way back in 2013, and further that the attachment is the key to all the encrypted stuff you've been emailing them ever since.
+You will have given the token-holders instructions to deliver the
+tokens to your successors upon your death. Hopefully one of them will
+be smart enough to figure out that the "ssss-combine" language on the
+tokens is a Unix shell command. If so, your successors will
+successfully reconstruct the passphrase. At that point, they will
+deduce that this string of gibberish must be the passphrase to that
+"Please Keep This Email Forever" email attachment you sent them way
+back in 2013, and further that the attachment is the key to all the
+encrypted stuff you've been emailing them ever since.
 
-Would your children/spouse/corporate partners actually do this? If you're detail-oriented and visionary enough to still be reading this README, then you were probably successful enough to amass some serious wealth while you were alive, including pure-digital assets such as Bitcoin. Thus it's safe to assume that they'll have the motivation to figure out this puzzle.
+Would your children/spouse/corporate partners actually do this? If
+you're detail-oriented and visionary enough to still be reading this
+README, then you were probably successful enough to amass some serious
+wealth while you were alive, including pure-digital assets such as
+Bitcoin. Thus it's safe to assume that they'll have the motivation to
+figure out this puzzle.
 
 Installation Instructions
 =========================
 
 1. Install Ruby.
-1. Install the Ruby gems rmagick and qrencoder.
+1. Install the Ruby gems rmagick and qrencoder. You'll have to figure out the dependencies for your OS. On Ubuntu 16.04, you'll need `libqrencode-dev ruby-dev libmagickwand-dev`.
 1. Install [ssss](http://point-at-infinity.org/ssss/), which is available on most Linux distributions via your package manager, and OSX through Homebrew.
 1. As a trial, run passsphrase. If you have all the system dependencies correct, you'll end up with a few PNG files in the current directory.
 
@@ -83,4 +104,7 @@ Tips From My Experience with Etching
 Credits
 =======
 
-* Special thanks to [Brendan Erwin](https://github.com/brendanjerwin/cold_steel_storage), who wrote up the original Instructable and the first version of the Ruby script that became paSSSphrase.
+* Special thanks to [Brendan
+  Erwin](https://github.com/brendanjerwin/cold_steel_storage), who
+  wrote up the original Instructable and the first version of the Ruby
+  script that became paSSSphrase.

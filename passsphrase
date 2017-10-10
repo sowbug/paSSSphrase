@@ -11,7 +11,7 @@
 # Needed for Ruby 1.8. 1.9 does this automatically.
 require "rubygems"
 
-require "RMagick"
+require "rmagick"
 require "date"
 require "digest/sha1"
 require "optparse"
